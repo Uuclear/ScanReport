@@ -1,0 +1,7 @@
+tkinter
+pdf2image
+paddlepaddle
+paddleocr
+Pillow
+PyPDF2
+regex 
