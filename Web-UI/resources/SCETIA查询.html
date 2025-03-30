@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<!-- #region Persistent fold region -->
+<style type="text/css" charset=utf-8">
+	BODY
+	{
+		margin:0;
+		padding:0;
+	}
+	.Container
+	{
+		margin:0 auto;
+		margin-top:50px;
+		width:700px;
+		background-color:#eee;	
+
+		font-size:9pt;
+		color:#000;
+	}
+	
+	.Container INPUT
+	{
+		color:#686868;
+		height:25px;
+		border:solid 1px #999;
+		margin-right:20px;
+		font-size:17pt;
+	}
+	
+	.Container BUTTON
+	{
+		border-width:1px;
+		width:100px;
+		height:25px;
+		padding-top:1px;
+	}
+	
+	.Container > DIV.Title
+	{
+		height:50px;
+		padding-top:10px;
+		background-color:#fff;
+		text-align:center;
+	}
+
+	.Container > DIV.Title2, .Container > DIV.Title2 A
+	{
+		height:20px;
+		background-color:#fff;
+		text-align:right;
+		color:#00009B;
+	}	
+
+	.Container > DIV.Title IMG
+	{
+		height:53px;
+	}
+	
+	.Container > DIV.Content
+	{
+		border:solid 1px #999;
+		text-align:center;
+	}
+	
+	#containerTable
+	{
+		width:100%;
+		margin:0;
+		padding:0;
+		border-collapse:collapse;
+	}
+	
+	#containerTable TR TD
+	{
+		background-color:#fff;
+		height:70px;
+		font-size:10pt;
+		color:#fff;
+	}
+	
+	#condition
+	{
+		background:url('images/s_bg.png') no-repeat;
+	}
+
+	#containerTable TR TD#info
+	{
+		height:20px;
+		padding:3px 0 0 5px;
+		border-top:solid 1px #999;
+		background-color:#F3F2F1;
+		text-align:left;
+		color:#000;
+	}
+	
+	#containerTable TR TD#result
+	{
+		background-color:#F3F2F1;
+		border-top:solid 1px #999;
+		text-align:left;
+		height:120px;
+	}
+	
+	#containerTable TR TD#result > DIV
+	{
+		float:left;
+	}
+	
+	#containerTable TR TD#result > DIV > IMG
+	{
+		height:100px;
+	}
+	
+	#resultText
+	{
+		color:#000;
+		padding-top:32px;
+	}
+	
+	#rqstConsignID
+	{
+		width:210px;
+	}
+	
+	#rqstIdentifyingCode
+	{
+		width:155px;
+	}
+	
+	#reTry
+	{
+		color:#2F3F9E;
+		text-decoration:underline;
+		padding-left:3px;
+		cursor:hand;
+	}
+	
+	.Hide
+	{
+		display:none;
+	}
+</style><!-- #endregion -->
+
+<title></title>
+</head>
+<!--[if lte IE 6]><script type="text/javascript" src="js/iehack.js"></script><![endif]-->
+<script language="javascript" defer="true">
+	
+	function DoSubmit(bttn)
+	{
+		bttn.disabled = true;
+		try
+		{
+			var actionRoute = "";
+			var rtURL = "http://www.scetia.com/AntiFakeReportQuery.asp"
+			//
+			var info = document.getElementById("info");
+			var rqstConsignID = document.getElementById("rqstConsignID");
+			var rqstIdentifyingCode = document.getElementById("rqstIdentifyingCode");
+			//
+			info.innerText = "";
+			info.style.display = "none";
+			//
+			if(rqstConsignID.value.length == 0)
+			{
+				info.innerText = "提示：请输入报告编号。";
+				info.style.display = "block";
+				return(false);
+			}
+			if(rqstIdentifyingCode.value.length == 0)
+			{
+				info.innerText = "提示：请输入防伪校验码。";
+				info.style.display = "block";
+				return(false);
+			}
+			if(rqstIdentifyingCode.value.length==12 &&  rqstIdentifyingCode.value.substring(0, 4) == "3001")// 工程* - 广告招牌
+			{
+				self.location = "https://signboard.scetimis.com/checkreport?reportOrEntrustNo="
+					+ rqstConsignID.value +"&identifyingCode=" + rqstIdentifyingCode.value + "&rtURL=" + rtURL;
+				
+			}
+			else if(rqstIdentifyingCode.value.length==10)//工程
+			{
+			    var numlength = (rqstIdentifyingCode.value.substring(0, 2) == "31" || rqstIdentifyingCode.value.substring(0, 2) == "27") ? 12 : 8; //一房一验是12位数字
+
+			    var tmp = rqstConsignID.value.substring(0, rqstConsignID.value.length - numlength);
+			    if (rqstConsignID.value.replace(tmp, '').length >= numlength)
+			        rqstConsignID.value = rqstConsignID.value.replace(tmp, '');
+
+				actionRoute = "http://www.scetimis.com/QueryReport/SearchQueryReport.aspx?rqstConsignID="
+					+ rqstConsignID.value +"&rqstIdentifyingCode=" + rqstIdentifyingCode.value + "&rtURL=" + rtURL;
+			}
+			else if(rqstIdentifyingCode.value.length==12)//新scetimis
+			{
+				actionRoute = "http://www.scetia.com/Scetia.OnlineExplorer/App_Public/AntiFakeReportQuery.aspx?rqstConsignID="
+					+ rqstConsignID.value +"&rqstIdentifyingCode=" + rqstIdentifyingCode.value + "&rtURL=" + rtURL;
+			}
+			else
+			{
+				info.innerText = "提示：防伪校验码应为10位或者12位，请核实。";
+				info.style.display = "block";
+				return(false);
+			}
+			//
+			if(actionRoute.length > 0)
+			{
+				var form = document.getElementById("form1");
+				form.action = actionRoute;
+				form.method = "post";
+				form.submit();
+			}
+		}
+		catch(e)
+		{
+			alert(e.message);
+		}
+		finally
+		{
+			bttn.disabled = false;
+		}
+	}
+	
+	function Retry(a)
+	{
+		a.disabled = true;
+		try
+		{
+			var result	= document.getElementById("result");
+			var condition = document.getElementById("condition");
+			result.style.display = "none";
+			condition.style.display = "block";
+		}
+		catch(e)
+		{
+			alert(e.message);
+		}
+		a.disabled = false;
+	}
+</script>
+<body>
+<div class="Container">
+<form id="form1"></form>
+	<div class="Title"><img src="images/AntiFakeReportQueryLog.png" /></div>
+	<div class="Title2"><a href="http://www.scetia.com/web/">返回首页</a></div>
+	<div class="Content">
+		<table id="containerTable">
+			<tr>
+				<td id="condition" >报告编号：<input id="rqstConsignID" type="text" maxlength="20" />防伪校验码：<input id="rqstIdentifyingCode" type="text" maxlength="12" />
+					<button onclick="javascript:DoSubmit(this);">查询</button></td>
+			</tr>
+			<tr>
+				<td id="info" class="Hide"></td>	
+			<tr>
+			<tr>
+					<td id="result" class='Hide'>
+							<div><img alt="infoPIC" id="infoPIC" src="images/wrong.png" runat="server"/></div>
+							<div id="resultText">很抱歉，没有能够搜索到您要查找的报告。<br />您可以调整查询条件后再次<span id="reTry" onclick="javascript:Retry(this);">尝试<span>。</div>
+					</td>
+			</tr>
+		</table>
+	</div>
+</div>
+</body>
+</html>

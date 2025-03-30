@@ -1,0 +1,204 @@
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>报告查询</title>
+    <link href="/Content/commonwx.css" rel="stylesheet" />
+    <script src="/Scripts/jquery.min.js" type="text/javascript"></script>
+    <script src="/Common/js/layer/layer.js"></script>
+    <script src="/Common/js/common.js"></script>
+    <script src="/Common/js/handle.js"></script>
+    <script type="text/javascript">
+        //var testingReportId = numDecode(GetQueryString("rId"), 2);
+        var testingReportId = GetQueryString("rId");    //交给后台解密
+        var testingReportNo = GetQueryString("rNo");
+        // var Swher_unitName = GetQueryString("unitName");
+        $(function () {
+            subShwre();
+
+        });
+        function subShwre() {
+            if (testingReportId.length == 0)
+                testingReportId = 0;
+            ajax({ testingReportId: testingReportId, testingReportNo: testingReportNo }, getReports, "/WeChat/GetReportInfo", "json");
+
+        }
+
+        function getReports(data) {
+            layer.closeAll();
+            if (data != null && data.testingReportNo) {
+                if (data.testingInstituteName)
+                    $("#txt_testingInstituteName").text(data.testingInstituteName);
+                if (data.testingReportNo)
+                    $("#txt_testingReportNo").text(data.testingReportNo);
+                if (data.testingOrderNo)
+                    $("#txt_testingOrderNo").text(data.testingOrderNo);
+                if (data.reportDate)
+                    $("#txt_reportDate").text(FormatTime(data.reportDate));
+                if (data.unitName)
+                    $("#txt_unitName").text(data.unitName);
+                if (data.testingDate)
+                    $("#txt_testingDate").text(FormatTime(data.testingDate));
+                if (data.testingTypeName == "抽样" || data.testingTypeName == "认证抽样") {
+                    $("#txt_testingDate").text(data.samplingDate);
+                    if (data.testingTypeName == "认证抽样") {
+                        $('#h_unit').text('受检单位');
+                    }
+                } if (data.projectName)
+                    $("#txt_projectName").text(data.projectName);
+                if (data.projectSection)
+                    $("#txt_projectSection").text(data.projectSection);
+                if (data.sampleNo)
+                    $("#txt_sampleNo").text(data.sampleNo);
+                if (data.sampleName)
+                    $("#txt_sampleName").text(data.sampleName);
+                if (data.productiveUnit)
+                    $("#txt_manufacturerName").text(data.productiveUnit);
+                if (data.testingBasisItems) {
+                    $("#txt_testingBasisItems").parents("li").show();
+                    if (data.testingBasisItems == "空标准")
+                        $("#txt_testingBasisItems").parents("li").hide();
+                    else
+                        $("#txt_testingBasisItems").text(data.testingBasisItems);
+                }
+                //if (data.testingResult)
+                //    $("#txt_testingResult").html(data.testingResult);
+                if (!(data.specification == "" && data.sampleLevel == ""))
+                    $("#txt_specificationModel").text(data.specification + data.sampleLevel);
+                if (data.isDelete == 1) {
+                    $("#isDeleteOne").hide();
+                    $("#isDeleteTwo").show();
+                } else {
+                    $("#isDeleteOne").show();
+                    $("#isDeleteTwo").hide();
+                }
+            } else {
+                $("li a").hide();
+                layer.alert(data);
+            }
+        }
+
+        function reportDown() {
+            //layer.open({
+            //    title: '下载',
+            //    type: 2,
+            //    area: ['70%', '40%'],
+            //    fix: true, //固定
+            //    maxmin: false,
+            //    content: ["/WeChat/SMSDownload?rId=" + testingReportId + "&rNo=" + testingReportNo, "yes"],
+            //    end: function () {
+            //        //layer.alert("下载成功，请重新操作", { icon: 6 });
+            //    }
+            //});
+            ajax({ testingReportId: testingReportId, testingReportNo: testingReportNo }, reportDownData, "/WeChat/GetReportUrl", "json");
+        }
+        function reportDownData(data) {
+            layer.closeAll();
+            if (data != null && data.state == 1) {
+                window.open(data.url);
+            } else {
+                layer.alert(data.msg);
+            }
+        }
+
+        //时间格式不需要时分秒：
+        function FormatTime(val) {
+            if (val == "" || val == undefined || val == null) {
+                return "";
+            }
+            if (val.indexOf("Date") > 0) {
+                var date = new Date(parseInt(val.replace("/Date(", "").replace(")/", ""), 10));
+                //月份为0-11，所以+1，月份小于10时补个0
+                var month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+                var currentDate = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+                return date.getFullYear() + "-" + month + "-" + currentDate;
+            } else {
+                //判断是否含有星期几这种字眼
+                if (val.indexOf("星期") > 0) {
+                    val = val.substr(0, val.indexOf("星期"));
+                }
+                var datetime = new Date(val);
+                var year = datetime.getFullYear();
+                var month = datetime.getMonth() + 1 < 10 ? "0" + (datetime.getMonth() + 1) : datetime.getMonth() + 1;
+                var date = datetime.getDate() < 10 ? "0" + datetime.getDate() : datetime.getDate();
+                return year + "-" + month + "-" + date;
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <!--业务部分-->
+    <div class="sh-container">
+        <div class="report-list">
+
+            <img class="logo" src="/images/logo_wx.jpg" alt="">
+            <ul>
+                <li>
+                    <h2 style="color:blue;display:none" id="isDeleteOne">该报告有效</h2>
+                    <h2 style="color:red;display:none" id="isDeleteTwo">该报告无效</h2>
+                </li>
+                <li>
+                    <h2>检测机构：</h2>
+                    <p id="txt_testingInstituteName">无</p>
+                </li>
+                <li>
+                    <h2>报告编号：</h2>
+                    <p id="txt_testingReportNo">无</p>
+                </li>
+                <li>
+                    <h2>签发日期：</h2>
+                    <p id="txt_reportDate">无</p>
+                </li>
+                <li>
+                    <h2>委托编号：</h2>
+                    <p id="txt_testingOrderNo">无</p>
+                </li>
+                <li>
+                    <h2>委托日期/抽样日期：</h2>
+                    <p id="txt_testingDate">无</p>
+                </li>
+                <li>
+                    <h2 id="h_unit">委托单位：</h2>
+                    <p id="txt_unitName">无</p>
+                </li>
+                <li>
+                    <h2>工程名称：</h2>
+                    <p id="txt_projectName">无</p>
+                </li>
+                <li>
+                    <h2>工程部位：</h2>
+                    <p id="txt_projectSection">无</p>
+                </li>
+                <li>
+                    <h2>样品编号：</h2>
+                    <p id="txt_sampleNo">无</p>
+                </li>
+                <li>
+                    <h2>样品名称：</h2>
+                    <p id="txt_sampleName">无</p>
+                </li>
+                <li>
+                    <h2>规格型号：</h2>
+                    <p id="txt_specificationModel">无</p>
+                </li>
+                <li>
+                    <h2>生产单位：</h2>
+                    <p id="txt_manufacturerName">无</p>
+                </li>
+                <li>
+                    <h2>检验依据：</h2>
+                    <p id="txt_testingBasisItems">无</p>
+                </li>
+                <li>
+                    <a href="javascript:;" onclick="reportDown()" style="color:blue;">报告下载</a>
+                </li>
+                
+            </ul>
+        </div>
+    </div> 
+</body>
+</html>
