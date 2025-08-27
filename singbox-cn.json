@@ -48,12 +48,12 @@
     {
       "type": "selector",
       "tag": "proxy",
-      "outbounds": ["vless-reality", "trojan-tls", "hysteria2", "tuic", "direct"],
-      "default": "vless-reality"
+      "outbounds": ["reality|C0Mw.love@xray.com", "direct"],
+      "default": "reality|C0Mw.love@xray.com"
     },
     {
       "type": "vless",
-      "tag": "vless-reality",
+      "tag": "reality|C0Mw.love@xray.com",
       "server": "band.slouch.top",
       "server_port": 22462,
       "uuid": "f26d2398-7908-40ad-cdc3-2fae560064c3",
@@ -70,33 +70,6 @@
         },
         "utls": { "enabled": true, "fingerprint": "chrome" }
       }
-    },
-    {
-      "type": "trojan",
-      "tag": "trojan-tls",
-      "server": "your.server.com",
-      "server_port": 443,
-      "password": "REPLACE_WITH_PASSWORD",
-      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
-    },
-    {
-      "type": "hysteria2",
-      "tag": "hysteria2",
-      "server": "your.server.com",
-      "server_port": 443,
-      "password": "REPLACE_WITH_PASSWORD",
-      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
-    },
-    {
-      "type": "tuic",
-      "tag": "tuic",
-      "server": "your.server.com",
-      "server_port": 443,
-      "uuid": "00000000-0000-0000-0000-000000000000",
-      "password": "REPLACE_WITH_PASSWORD",
-      "congestion_control": "bbr",
-      "udp_relay_mode": "native",
-      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
     },
     { "type": "direct", "tag": "direct" },
     { "type": "block", "tag": "block" },
