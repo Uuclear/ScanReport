@@ -1,0 +1,150 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "strategy": "prefer_ipv4",
+    "final": "dns-direct",
+    "independent_cache": true,
+    "fakeip": {
+      "enabled": true,
+      "inet4_range": "198.18.0.0/15",
+      "inet6_range": "fc00::/18"
+    },
+    "servers": [
+      {
+        "tag": "dns-direct",
+        "address": "https://dns.alidns.com/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-direct-backup",
+        "address": "https://doh.pub/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-proxy",
+        "address": "https://1.1.1.1/dns-query",
+        "detour": "proxy"
+      }
+    ],
+    "rules": [
+      { "rule_set": "geosite-cn", "server": "dns-direct" },
+      { "rule_set": "geoip-cn", "server": "dns-direct" },
+      { "rule_set": "geosite-geolocation-!cn", "server": "dns-proxy" }
+    ]
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 7890,
+      "sniff": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "proxy",
+      "outbounds": ["vless-reality", "trojan-tls", "hysteria2", "tuic", "direct"],
+      "default": "vless-reality"
+    },
+    {
+      "type": "vless",
+      "tag": "vless-reality",
+      "server": "your.server.com",
+      "server_port": 443,
+      "uuid": "00000000-0000-0000-0000-000000000000",
+      "flow": "",
+      "packet_encoding": "xudp",
+      "transport": { "type": "tcp" },
+      "tls": {
+        "enabled": true,
+        "server_name": "your.sni.host",
+        "reality": {
+          "enabled": true,
+          "public_key": "REPLACE_WITH_PUBLIC_KEY",
+          "short_id": ""
+        }
+      }
+    },
+    {
+      "type": "trojan",
+      "tag": "trojan-tls",
+      "server": "your.server.com",
+      "server_port": 443,
+      "password": "REPLACE_WITH_PASSWORD",
+      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
+    },
+    {
+      "type": "hysteria2",
+      "tag": "hysteria2",
+      "server": "your.server.com",
+      "server_port": 443,
+      "password": "REPLACE_WITH_PASSWORD",
+      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
+    },
+    {
+      "type": "tuic",
+      "tag": "tuic",
+      "server": "your.server.com",
+      "server_port": 443,
+      "uuid": "00000000-0000-0000-0000-000000000000",
+      "password": "REPLACE_WITH_PASSWORD",
+      "congestion_control": "bbr",
+      "udp_relay_mode": "native",
+      "tls": { "enabled": true, "server_name": "your.sni.host", "insecure": false }
+    },
+    { "type": "direct", "tag": "direct" },
+    { "type": "block", "tag": "block" },
+    { "type": "dns", "tag": "dns" }
+  ],
+  "route": {
+    "auto_detect_interface": true,
+    "final": "proxy",
+    "rules": [
+      { "protocol": "dns", "outbound": "dns" },
+      { "rule_set": "geosite-ads", "outbound": "block" },
+      { "rule_set": "geosite-cn", "outbound": "direct" },
+      { "rule_set": "geoip-cn", "outbound": "direct" },
+      { "ip_is_private": true, "outbound": "direct" }
+    ],
+    "rule_set": [
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite-cn.srs",
+        "download_detour": "direct",
+        "update_interval": "168h"
+      },
+      {
+        "tag": "geosite-geolocation-!cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite-geolocation-!cn.srs",
+        "download_detour": "direct",
+        "update_interval": "168h"
+      },
+      {
+        "tag": "geosite-ads",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite-category-ads-all.srs",
+        "download_detour": "direct",
+        "update_interval": "168h"
+      },
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://cdn.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip-cn.srs",
+        "download_detour": "direct",
+        "update_interval": "168h"
+      }
+    ]
+  }
+}
+
